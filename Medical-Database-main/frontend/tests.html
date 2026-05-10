@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hospital Management • Tests</title>
+  <link rel="stylesheet" href="styling.css" />
+</head>
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <div class="brand">Hospital Management <small>Tests</small></div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span class="badge" id="userDisplay"></span>
+        <button class="btn btn-danger" style="padding:6px 14px; font-size:0.82rem;" onclick="AUTH.logout()">Logout</button>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="admit.html"   id="navAdmit">Admitting</a>
+      <a href="orders.html"  id="navOrders">Orders</a>
+      <a href="labs.html"    id="navLabs">Labs</a>
+      <a href="tests.html"   class="active" id="navTests">Tests</a>
+      <a href="billing.html" id="navBilling">Billing</a>
+    </nav>
+
+    <!-- Order a Test -->
+    <div class="card" style="margin-top:16px;" id="sectionTestForm">
+      <div class="header">
+        <div style="font-weight:800;">Order a Test</div>
+      </div>
+      <form id="testForm">
+        <div class="grid grid-2">
+          <div>
+            <label for="testPatientId">Patient ID</label>
+            <input id="testPatientId" name="PatientID" type="number" required placeholder="101" />
+          </div>
+          <div>
+            <label for="testType">Test Type</label>
+            <select id="testType" name="TestType" required>
+              <option value="">Select…</option>
+              <option value="X-Ray Chest">X-Ray Chest</option>
+              <option value="CT Head">CT Head</option>
+              <option value="EKG">EKG</option>        
+              <option value="Ultrasound Abdomen">Ultrasound Abdomen</option>      
+             
+            </select>
+          </div>
+          <div>
+            <label for="testProvider">Ordering Provider</label>
+            <input id="testProvider" name="OrderingProvider" placeholder="Dr. Hernandez" />
+          </div>
+          <div>
+            <label for="testStatus">Status</label>
+            <select id="testStatus" name="TestStatus">
+              <option value="Ordered">Ordered</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Canceled">Canceled</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Order Test</button>
+          <button class="btn" type="reset">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Search Tests</div>
+      </div>
+      <form id="testsSearchForm">
+        <div class="row">
+          <input id="testsSearch" placeholder="Patient ID or test type" />
+          <button class="btn btn-primary">Search</button>
+          <button type="button" class="btn" onclick="loadTests()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Test Results table -->
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Test Results</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>TestResultID</th><th>PatientID</th><th>TestType</th>
+              <th>Impression</th><th>Findings</th><th>DateTime</th><th>TestStatus</th>
+            </tr>
+          </thead>
+          <tbody id="testsTableBody">
+            <tr><td colspan="7" style="text-align:center; color:#718096;">
+              No results loaded — connect backend to populate.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    function renderTests(data) {
+      const tbody = document.getElementById('testsTableBody');
+      tbody.innerHTML = '';
+
+      if (!data || !data.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; color:#718096;">
+              No tests found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      data.forEach(t => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${t.TestResultID ?? ''}</td>
+            <td>${t.PatientID ?? ''}</td>
+            <td>${t.TestType ?? ''}</td>
+            <td>${t.Impression ?? ''}</td>
+            <td>${t.Findings ?? ''}</td>
+            <td>${t.DateTime ?? ''}</td>
+            <td>${t.TestStatus ?? ''}</td>
+          </tr>
+        `;
+      });
+    }
+
+    async function loadTests(query = '') {
+      try {
+        const url = query
+          ? `http://localhost:8848/api/tests/search?q=${encodeURIComponent(query)}`
+          : `http://localhost:8848/api/tests`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || 'Failed to load tests.');
+          return;
+        }
+
+        renderTests(data);
+      } catch {
+        alert('Could not reach the server.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (AUTH.role === 'patient') {
+        AUTH.markReadOnly('sectionTestForm');
+        document.getElementById('testsSearchForm').classList.add('hidden');
+      }
+
+      if (!AUTH.canAccess('navTests', 'edit')) {
+        AUTH.markReadOnly('sectionTestForm');
+      }
+
+      loadTests();
+
+      if (AUTH.role !== 'patient') {
+        document.getElementById('testsSearchForm').addEventListener('submit', e => {
+          e.preventDefault();
+          loadTests(document.getElementById('testsSearch').value.trim());
+        });
+      }
+
+      document.getElementById('testForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const payload = {
+          PatientID: parseInt(document.getElementById('testPatientId').value),
+          TestType: document.getElementById('testType').value,
+          OrderingProvider: document.getElementById('testProvider').value.trim(),
+          TestStatus: document.getElementById('testStatus').value
+        };
+
+        try {
+          const res = await fetch('http://localhost:8848/api/tests', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            alert('Test ordered.');
+            this.reset();
+            loadTests();
+          } else {
+            alert(data.error || 'Failed to order test.');
+          }
+        } catch {
+          alert('Could not reach the server.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hospital Management • Billing</title>
+  <link rel="stylesheet" href="styling.css" />
+</head>
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <div class="brand">Hospital Management <small>Billing</small></div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span class="badge" id="userDisplay"></span>
+        <button class="btn btn-danger" style="padding:6px 14px; font-size:0.82rem;" onclick="AUTH.logout()">Logout</button>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="admit.html"   id="navAdmit">Admitting</a>
+      <a href="orders.html"  id="navOrders">Orders</a>
+      <a href="labs.html"    id="navLabs">Labs</a>
+      <a href="tests.html"   id="navTests">Tests</a>
+      <a href="billing.html" class="active" id="navBilling">Billing</a>
+    </nav>
+
+    <!-- Update Billing (admin/front_desk only) -->
+    <div class="card" style="margin-top:16px;" id="sectionBillingForm">
+      <div class="header">
+        <div style="font-weight:800;">Update Billing Record</div>
+      </div>
+      <form id="billingForm">
+        <div class="grid grid-2">
+          <div>
+            <label for="billPatientId">Patient ID</label>
+            <input id="billPatientId" name="PatientID" type="number" required placeholder="101" />
+          </div>
+          <div>
+            <label for="roomCharge">Room Charge ($)</label>
+            <input id="roomCharge" name="RoomCharge" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div>
+            <label for="visitCharge">Visit Charge ($)</label>
+            <input id="visitCharge" name="VisitCharge" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div>
+            <label for="rxCharge">Rx Charge ($)</label>
+            <input id="rxCharge" name="RxCharge" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div>
+            <label for="labCharge">Lab Charge ($)</label>
+            <input id="labCharge" name="LabCharge" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div>
+            <label for="imagingCharge">Imaging Charge ($)</label>
+            <input id="imagingCharge" name="ImagingCharge" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div>
+            <label for="insurancePaid">Insurance Paid ($)</label>
+            <input id="insurancePaid" name="InsurancePaid" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div>
+            <label for="patientPaid">Patient Paid ($)</label>
+            <input id="patientPaid" name="PatientPaid" type="number" step="0.01" placeholder="0.00" />
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Save Billing</button>
+          <button class="btn" type="reset">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Search Billing</div>
+      </div>
+      <form id="billingSearchForm">
+        <div class="row">
+          <input id="billingSearch" placeholder="Patient ID" />
+          <button class="btn btn-primary">Search</button>
+          <button type="button" class="btn" onclick="loadBilling()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Billing table -->
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Billing Records</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>BillingID</th><th>PatientID</th><th>RoomCharge</th><th>VisitCharge</th>
+              <th>RxCharge</th><th>LabCharge</th><th>ImagingCharge</th>
+              <th>TotalCharge</th><th>InsurancePaid</th><th>PatientPaid</th><th>BalanceDue</th>
+            </tr>
+          </thead>
+          <tbody id="billingTableBody">
+            <tr><td colspan="11" style="text-align:center; color:#718096;">
+              No records loaded — connect backend to populate.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    function renderBilling(data) {
+      const tbody = document.getElementById('billingTableBody');
+      tbody.innerHTML = '';
+
+      if (!data || !data.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="11" style="text-align:center; color:#718096;">
+              No billing found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      data.forEach(b => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${b.BillingID ?? ''}</td>
+            <td>${b.PatientID ?? ''}</td>
+            <td>${b.RoomCharge ?? ''}</td>
+            <td>${b.VisitCharge ?? ''}</td>
+            <td>${b.RxCharge ?? ''}</td>
+            <td>${b.LabCharge ?? ''}</td>
+            <td>${b.ImagingCharge ?? ''}</td>
+            <td>${b.TotalCharge ?? ''}</td>
+            <td>${b.InsurancePaid ?? ''}</td>
+            <td>${b.PatientPaid ?? ''}</td>
+            <td>${b.BalanceDue ?? ''}</td>
+          </tr>
+        `;
+      });
+    }
+
+    async function loadBilling(query = '') {
+      try {
+        const url = query
+          ? `http://localhost:8848/api/billing/search?q=${encodeURIComponent(query)}`
+          : `http://localhost:8848/api/billing`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || 'Failed to load billing.');
+          return;
+        }
+
+        renderBilling(data);
+      } catch {
+        alert('Could not reach the server.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (AUTH.role === 'patient') {
+        AUTH.markReadOnly('sectionBillingForm');
+        document.getElementById('billingSearchForm').classList.add('hidden');
+      }
+
+      if (!AUTH.canAccess('navBilling', 'edit')) {
+        AUTH.markReadOnly('sectionBillingForm');
+      }
+
+      loadBilling();
+
+      if (AUTH.role !== 'patient') {
+        document.getElementById('billingSearchForm').addEventListener('submit', e => {
+          e.preventDefault();
+          loadBilling(document.getElementById('billingSearch').value.trim());
+        });
+      }
+
+      document.getElementById('billingForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const payload = {
+          PatientID: parseInt(document.getElementById('billPatientId').value),
+          RoomCharge: parseFloat(document.getElementById('roomCharge').value) || 0,
+          VisitCharge: parseFloat(document.getElementById('visitCharge').value) || 0,
+          RxCharge: parseFloat(document.getElementById('rxCharge').value) || 0,
+          LabCharge: parseFloat(document.getElementById('labCharge').value) || 0,
+          ImagingCharge: parseFloat(document.getElementById('imagingCharge').value) || 0,
+          InsurancePaid: parseFloat(document.getElementById('insurancePaid').value) || 0,
+          PatientPaid: parseFloat(document.getElementById('patientPaid').value) || 0
+        };
+
+        try {
+          const res = await fetch('http://localhost:8848/api/billing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            alert('Billing record saved.');
+            this.reset();
+            loadBilling();
+          } else {
+            alert(data.error || 'Failed to save billing.');
+          }
+        } catch {
+          alert('Could not reach the server.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

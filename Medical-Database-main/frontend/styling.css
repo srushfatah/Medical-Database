@@ -1,0 +1,333 @@
+/* ── Reset & Base ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f0f4f8;
+  color: #1a202c;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* ── Container ── */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── Login page centering ── */
+body.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Top Bar (admitting page) ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+/* ── Header (login page / card headers) ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+/* ── Brand ── */
+.brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #276749;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand small {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #718096;
+}
+
+/* ── Badge ── */
+.badge {
+  background: #f0fff4;
+  color: #276749;
+  border: 1px solid #9ae6b4;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Nav ── */
+.nav {
+  display: flex;
+  gap: 4px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #4a5568;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 7px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav a:hover {
+  background: #f0fff4;
+  color: #276749;
+}
+
+.nav a.active {
+  background: #38a169;
+  color: #fff;
+}
+
+/* ── Card ── */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+}
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ── Row (flex) ── */
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+/* ── Form Elements ── */
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 6px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #1a202c;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: #68d391;
+  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+}
+
+input::placeholder {
+  color: #a0aec0;
+}
+
+/* ── Hint ── */
+.hint {
+  font-size: 0.78rem;
+  color: #718096;
+  margin-top: 6px;
+}
+
+.hint code {
+  background: #edf2f7;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: #2d3748;
+}
+
+/* ── Divider ── */
+hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 20px 0;
+}
+
+/* ── Actions ── */
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ── Buttons ── */
+.btn {
+  padding: 10px 22px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #4a5568;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:hover {
+  background: #f7fafc;
+}
+
+.btn-primary {
+  background: #38a169;
+  color: #fff;
+  border-color: #276749;
+}
+
+.btn-primary:hover {
+  background: #276749;
+  border-color: #276749;
+}
+
+.btn-danger {
+  background: #c53030;
+  color: #fff;
+  border-color: #c53030;
+}
+
+.btn-danger:hover {
+  background: #9b2c2c;
+  border-color: #9b2c2c;
+}
+
+/* ── Table ── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+thead {
+  background: #edf2f7;
+}
+
+thead th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #4a5568;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-top: 1px solid #e2e8f0;
+  transition: background 0.15s;
+}
+
+tbody tr:hover {
+  background: #f7fafc;
+}
+
+tbody td {
+  padding: 10px 14px;
+  color: #2d3748;
+  white-space: nowrap;
+}
+
+/* ── Error ── */
+.error {
+  background: #fff5f5;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar,
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .nav {
+    gap: 2px;
+  }
+
+  .nav a {
+    padding: 6px 10px;
+  }
+}
+
+/* ── Read-only banner (shown when role can view but not edit) ── */
+.readonly-banner {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+/* ── Hidden utility ── */
+.hidden {
+  display: none !important;
+}

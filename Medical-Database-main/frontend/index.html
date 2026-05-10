@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hospital Management • Login</title>
+  <link rel="stylesheet" href="index.css" />
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        Hospital Management
+        <small>Login to continue</small>
+      </div>
+    </div>
+
+    <div class="card-wrapper">
+
+      <!-- ── LOGIN CARD ── -->
+      <div class="card" id="loginCard">
+        <form id="loginForm">
+          <div class="grid">
+            <div>
+              <label for="username">Username</label>
+              <input id="username" name="username" autocomplete="username" required placeholder="jdoe" />
+            </div>
+            <div>
+              <label for="password">Password</label>
+              <input id="password" name="password" type="password" autocomplete="current-password" required
+                placeholder="••••••••" />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit">Sign In</button>
+          </div>
+        </form>
+        <div id="loginError" style="display:none;"></div>
+
+        <hr style="margin-top:16px;" />
+
+        <div class="create-account">
+          Don't have an account? <a onclick="showCreate()">Create Account</a>
+        </div>
+      </div>
+
+      <!-- ── DEV BYPASS — remove before production ── -->
+      <hr style="margin-top:16px;" />
+      <div style="margin-top:12px;">
+        <div
+          style="font-size:0.75rem; font-weight:700; color:#a0aec0; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">
+          ⚡ Dev Bypass — Test Role Views
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn" onclick="devLogin('admin',      'Admin')"
+            style="font-size:0.8rem; padding:7px 10px;">Admin</button>
+          <button class="btn" onclick="devLogin('doctor',     'Doctor')"
+            style="font-size:0.8rem; padding:7px 10px;">Doctor</button>
+          <button class="btn" onclick="devLogin('nurse',      'Nurse')"
+            style="font-size:0.8rem; padding:7px 10px;">Nurse</button>
+          <button class="btn" onclick="devLogin('patient',    'Patient')"
+            style="font-size:0.8rem; padding:7px 10px;">Patient</button>
+          <button class="btn" onclick="devLogin('front_desk', 'Front Desk')"
+            style="font-size:0.8rem; padding:7px 10px; grid-column:1/-1;">Front Desk</button>
+        </div>
+      </div>
+      </div>
+
+      <!-- ── CREATE ACCOUNT CARD ── -->
+      <div class="card hidden" id="createCard">
+        <button class="back-link" onclick="showLogin()">&#8592; Back to Login</button>
+        <div class="card-title">Create Account</div>
+
+        <form id="registerForm">
+          <div class="grid grid-2">
+            <div>
+              <label for="newFirst">First Name</label>
+              <input id="newFirst" name="FirstName" required placeholder="Jane" />
+            </div>
+            <!-- This field only shows up when the user selects "patient" as their role during registration.  -->
+            <div id="patientIDField" style="display:none;">
+              <label for="newPatientID">Patient ID</label>
+              <input id="newPatientID" name="PatientID" type="number" placeholder="Enter your Patient ID" />
+            </div>
+            <div>
+              <label for="newLast">Last Name</label>
+              <input id="newLast" name="LastName" required placeholder="Smith" />
+            </div>
+            <div>
+              <label for="newUsername">Username</label>
+              <input id="newUsername" name="username" autocomplete="username" required placeholder="jsmith" />
+            </div>
+            <div>
+              <label for="newRole">Role</label>
+              <select id="newRole" name="role" required>
+                <option value="">Select role…</option>
+                <option value="front desk">Front Desk</option>
+                <option value="doctor">Doctor</option>
+                <option value="nurse">Nurse</option>
+                <option value="patient">Patient</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div style="grid-column:1 / -1;">
+              <label for="newPassword">Password</label>
+              <input id="newPassword" name="password" type="password" autocomplete="new-password" required
+                placeholder="••••••••" />
+            </div>
+            <div style="grid-column:1 / -1;">
+              <label for="confirmPassword">Confirm Password</label>
+              <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required
+                placeholder="••••••••" />
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" type="reset">Clear</button>
+            <button class="btn btn-primary" type="submit">Create Account</button>
+          </div>
+        </form>
+        <div id="registerError" style="display:none;"></div>
+
+        <div class="create-account" style="margin-top:16px;">
+          Already have an account? <a onclick="showLogin()">Sign In</a>
+        </div>
+      </div>
+    </div><!-- end card-wrapper -->
+  </div>
+
+  <script src = "index.js"></script>
+</body>
+
+</html>

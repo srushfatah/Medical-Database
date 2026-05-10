@@ -1,0 +1,246 @@
+/* ── Reset & Base ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f0f4f8;
+  color: #1a202c;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* ── Container ── */
+.container {
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #276749;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand small {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #718096;
+}
+
+/* ── Card wrapper (handles slide transition) ── */
+.card-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Card ── */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  width: 100%;
+}
+
+/* Slide states */
+.card.slide-out-left {
+  transform: translateX(-110%);
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.card.slide-in-right {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.card.hidden {
+  display: none;
+}
+
+/* ── Grid ── */
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ── Form Elements ── */
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 6px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #1a202c;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: #68d391;
+  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+}
+
+input::placeholder {
+  color: #a0aec0;
+}
+
+/* ── Card title ── */
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #276749;
+  margin-bottom: 20px;
+}
+
+/* ── Hint ── */
+.hint {
+  font-size: 0.78rem;
+  color: #718096;
+  margin-top: 6px;
+}
+
+/* ── Divider ── */
+hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* ── Actions ── */
+.actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ── Buttons ── */
+.btn {
+  padding: 10px 22px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  color: #4a5568;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:hover {
+  background: #f7fafc;
+}
+
+.btn-primary {
+  background: #38a169;
+  color: #fff;
+  border-color: #38a169;
+}
+
+.btn-primary:hover {
+  background: #276749;
+  border-color: #276749;
+}
+
+/* ── Create Account link ── */
+.create-account {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #4a5568;
+}
+
+.create-account a {
+  color: #38a169;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.create-account a:hover {
+  text-decoration: underline;
+}
+
+/* ── Back link ── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  color: #38a169;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Error ── */
+.error {
+  background: #fff5f5;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  margin-top: 12px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 500px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}

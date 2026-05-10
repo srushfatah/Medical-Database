@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hospital Management • Labs</title>
+  <link rel="stylesheet" href="styling.css" />
+</head>
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <div class="brand">Hospital Management <small>Labs</small></div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span class="badge" id="userDisplay"></span>
+        <button class="btn btn-danger" style="padding:6px 14px; font-size:0.82rem;" onclick="AUTH.logout()">Logout</button>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="admit.html"   id="navAdmit">Admitting</a>
+      <a href="orders.html"  id="navOrders">Orders</a>
+      <a href="labs.html"    class="active" id="navLabs">Labs</a>
+      <a href="tests.html"   id="navTests">Tests</a>
+      <a href="billing.html" id="navBilling">Billing</a>
+    </nav>
+
+    <!-- Order a Lab (admin/doctor/nurse only) -->
+    <div class="card" style="margin-top:16px;" id="sectionLabForm">
+      <div class="header">
+        <div style="font-weight:800;">Order a Lab</div>
+      </div>
+      <form id="labForm">
+        <div class="grid grid-2">
+          <div>
+            <label for="labPatientId">Patient ID</label>
+            <input id="labPatientId" name="PatientID" type="number" required placeholder="101" />
+          </div>
+          <div>
+            <label for="labType">Lab Type</label>
+            <select id="labType" name="LabType" required>
+              <option value="">Select…</option>
+              <option value="CBC">CBC</option>
+              <option value="BMP">BMP</option>
+              <option value="A1C">A1C</option>
+              <option value="Lipid Panel">Lipid Panel</option>
+            </select>
+          </div>
+          <div>
+            <label for="labProvider">Ordering Provider</label>
+            <input id="labProvider" name="OrderingProvider" placeholder="Dr. Hernandez" />
+          </div>
+          <div>
+            <label for="labStatus">Status</label>
+            <select id="labStatus" name="LabStatus">
+              <option value="Ordered">Ordered</option>
+              <option value="Collected">Collected</option>
+              <option value="Completed">Completed</option>
+              <option value="Canceled">Canceled</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Order Lab</button>
+          <button class="btn" type="reset">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Search Labs</div>
+      </div>
+      <form id="labsSearchForm">
+        <div class="row">
+          <input id="labsSearch" placeholder="Patient ID or lab type" />
+          <button class="btn btn-primary">Search</button>
+          <button type="button" class="btn" onclick="loadLabs()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+
+    <!-- Lab Results table -->
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Lab Results</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>LabResultID</th><th>PatientID</th><th>LabType</th><th>ResultName</th>
+              <th>ResultValue</th><th>Unit</th><th>ReferenceRange</th><th>Flag</th><th>DateTime</th><th>LabStatus</th>
+            </tr>
+          </thead>
+          <tbody id="labsTableBody">
+            <tr><td colspan="10" style="text-align:center; color:#718096;">
+              No results loaded — connect backend to populate.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    function renderLabs(data) {
+      const tbody = document.getElementById('labsTableBody');
+      tbody.innerHTML = '';
+
+      if (!data || !data.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="10" style="text-align:center; color:#718096;">
+              No labs found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      data.forEach(l => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${l.LabResultID ?? ''}</td>
+            <td>${l.PatientID ?? ''}</td>
+            <td>${l.LabType ?? ''}</td>
+            <td>${l.ResultName ?? ''}</td>
+            <td>${l.ResultValue ?? ''}</td>
+            <td>${l.Unit ?? ''}</td>
+            <td>${l.ReferenceRange ?? ''}</td>
+            <td>${l.Flag ?? ''}</td>
+            <td>${l.DateTime ?? ''}</td>
+            <td>${l.LabStatus ?? ''}</td>
+          </tr>
+        `;
+      });
+    }
+
+    async function loadLabs(query = '') {
+      try {
+        const url = query
+          ? `http://localhost:8848/api/labs/search?q=${encodeURIComponent(query)}`
+          : `http://localhost:8848/api/labs`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || 'Failed to load labs.');
+          return;
+        }
+
+        renderLabs(data);
+      } catch {
+        alert('Could not reach the server.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (AUTH.role === 'patient') {
+        AUTH.markReadOnly('sectionLabForm');
+        document.getElementById('labsSearchForm').classList.add('hidden');
+      }
+
+      if (!AUTH.canAccess('navLabs', 'edit')) {
+        AUTH.markReadOnly('sectionLabForm');
+      }
+
+      loadLabs();
+
+      if (AUTH.role !== 'patient') {
+        document.getElementById('labsSearchForm').addEventListener('submit', e => {
+          e.preventDefault();
+          loadLabs(document.getElementById('labsSearch').value.trim());
+        });
+      }
+
+      document.getElementById('labForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const payload = {
+          PatientID: parseInt(document.getElementById('labPatientId').value),
+          LabType: document.getElementById('labType').value,
+          OrderingProvider: document.getElementById('labProvider').value.trim(),
+          LabStatus: document.getElementById('labStatus').value
+        };
+
+        try {
+          const res = await fetch('http://localhost:8848/api/labs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            alert('Lab ordered.');
+            this.reset();
+            loadLabs();
+          } else {
+            alert(data.error || 'Failed to order lab.');
+          }
+        } catch {
+          alert('Could not reach the server.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

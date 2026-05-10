@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hospital Management • Patient Admitting</title>
+  <link rel="stylesheet" href="styling.css" />
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- ── Top Bar ── -->
+    <div class="topbar">
+      <div class="brand">
+        Hospital Management
+        <small>Patient Admitting</small>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span class="badge" id="userDisplay"></span>
+        <button class="btn btn-danger" style="padding:6px 14px; font-size:0.82rem;"
+          onclick="AUTH.logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- ── Nav ── -->
+    <nav class="nav">
+      <a href="admit.html" class="active" id="navAdmit">Admitting</a>
+      <a href="orders.html" id="navOrders">Orders</a>
+      <a href="labs.html" id="navLabs">Labs</a>
+      <a href="tests.html" id="navTests">Tests</a>
+      <a href="billing.html" id="navBilling">Billing</a>
+    </nav>
+
+    <!-- ── Main grid ── -->
+    <div class="grid grid-2" style="margin-top:16px;">
+
+      <!-- Admit / Update Patient -->
+      <div class="card" id="sectionAdmitForm">
+        <div class="header">
+          <div style="font-weight:800;">Admit / Update Patient</div>
+        </div>
+        <form id="admitForm">
+          <div class="grid grid-2">
+            <div>
+              <label for="patientName">Patient Name</label>
+              <input id="patientName" name="PatientName" required placeholder="Jane Smith" />
+            </div>
+            <div>
+              <label for="gender">Gender</label>
+              <select id="gender" name="Gender" required>
+                <option value="">Select…</option>
+                <option value="F">Female</option>
+                <option value="M">Male</option>
+                <option value="O">Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="age">Age</label>
+              <input id="age" name="Age" type="number" min="0" max="130" required placeholder="35" />
+            </div>
+            <div>
+              <label for="admitDate">Admit Date</label>
+              <input id="admitDate" name="AdmitDate" type="date" required />
+            </div>
+            <div style="grid-column:1 / -1;">
+              <label for="admitReason">Admit Reason</label>
+              <input id="admitReason" name="AdmitReason" required placeholder="Chest pain / observation" />
+            </div>
+            <div>
+              <label for="roomNumber">Room Number</label>
+              <input id="roomNumber" name="RoomNumber" required placeholder="204B" />
+            </div>
+            <div>
+              <label for="attendingPhysician">Attending Physician</label>
+              <input id="attendingPhysician" name="AttendingPhysician" required placeholder="Dr. Hernandez" />
+            </div>
+            <div style="grid-column:1 / -1;">
+              <label for="dischargeDate">Discharge Date (optional)</label>
+              <input id="dischargeDate" name="DischargeDate" type="date" />
+              <div class="hint">Leave blank if patient is still admitted.</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" type="submit" id="btnAdmit">Admit Patient</button>
+            <button class="btn" type="reset">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Discharge + Search -->
+      <div class="card">
+
+        <!-- Discharge -->
+        <div id="sectionDischarge">
+          <div class="header">
+            <div style="font-weight:800;">Discharge Patient</div>
+          </div>
+          <form id="dischargeForm">
+            <div class="grid grid-2">
+              <div>
+                <label for="patientIdDischarge">Patient ID</label>
+                <input id="patientIdDischarge" name="PatientID" type="number" min="1" required placeholder="101" />
+              </div>
+              <div>
+                <label for="dischargeDate2">Discharge Date</label>
+                <input id="dischargeDate2" name="DischargeDate" type="date" required />
+              </div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-danger" type="submit" id="btnDischarge">Discharge</button>
+            </div>
+          </form>
+        </div>
+
+        <hr />
+
+        <!-- Search -->
+        <div class="header" style="margin-top:4px;">
+          <div style="font-weight:800;">Search Patients</div>
+        </div>
+        <form id="searchForm">
+          <div class="row">
+            <div style="flex:1; min-width:200px;">
+              <label for="q">Name or Room</label>
+              <input id="q" name="q" placeholder="e.g. Smith or 204B" />
+            </div>
+            <div style="align-self:end;">
+              <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Patient table -->
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Current Patients</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>PatientID</th>
+              <th>PatientName</th>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>AdmitDate</th>
+              <th>DischargeDate</th>
+              <th>AdmitReason</th>
+              <th>RoomNumber</th>
+              <th>AttendingPhysician</th>
+            </tr>
+          </thead>
+          <tbody id="patientTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- auth.js FIRST, then page script -->
+  <script src="auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+      /* ── Apply role restrictions ── */
+      // doctor/nurse: can view but not admit or discharge
+      if (!AUTH.canAccess('navAdmit', 'edit')) {
+        AUTH.markReadOnly('sectionAdmitForm');
+        AUTH.markReadOnly('sectionDischarge');
+      }
+
+      /* ── Admit form → POST /api/patients/admit ── */
+      document.getElementById('admitForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const payload = {
+          PatientName: document.getElementById('patientName').value.trim(),
+          Gender: document.getElementById('gender').value,
+          Age: parseInt(document.getElementById('age').value),
+          AdmitDate: document.getElementById('admitDate').value,
+          AdmitReason: document.getElementById('admitReason').value.trim(),
+          RoomNumber: document.getElementById('roomNumber').value.trim(),
+          AttendingPhysician: document.getElementById('attendingPhysician').value.trim(),
+          DischargeDate: document.getElementById('dischargeDate').value || null
+        };
+        try {
+          const res = await fetch('/api/patients/admit', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok) { alert('Patient admitted successfully.'); this.reset(); }
+          else { alert(data.error || 'Failed to admit patient.'); }
+        } catch { alert('Could not reach the server.'); }
+      });
+
+      /* ── Discharge form → POST /api/patients/discharge ── */
+      document.getElementById('dischargeForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const payload = {
+          PatientID: parseInt(document.getElementById('patientIdDischarge').value),
+          DischargeDate: document.getElementById('dischargeDate2').value
+        };
+        try {
+          const res = await fetch('/api/patients/discharge', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (res.ok) { alert('Patient discharged.'); this.reset(); }
+          else { alert(data.error || 'Failed to discharge patient.'); }
+        } catch { alert('Could not reach the server.'); }
+      });
+
+      /* ── Search form → GET /api/patients/search?q= ── */
+      document.getElementById('searchForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const q = document.getElementById('q').value.trim();
+        try {
+          const res = await fetch(`/api/patients/search?q=${encodeURIComponent(q)}`);
+          const data = await res.json();
+          if (res.ok) { renderTable(data.patients); }
+          else { alert(data.error || 'Search failed.'); }
+        } catch { alert('Could not reach the server.'); }
+      });
+
+      // If the user is an admin or front desk, load all patients automatically without needing to search.
+      if (AUTH.role === 'admin' || AUTH.role === 'front_desk') {
+        fetch('/api/patients/search?q=')
+          .then(r => r.json())
+          .then(data => { if (data.patients) renderTable(data.patients); })
+          .catch(() => {});
+      }
+
+      function renderTable(patients) {
+        const tbody = document.getElementById('patientTableBody');
+        tbody.innerHTML = patients.map(p => `
+          <tr>
+            <td>${p.PatientID}</td>
+            <td>${p.PatientName}</td>
+            <td>${p.Gender}</td>
+            <td>${p.Age}</td>
+            <td>${p.AdmitDate}</td>
+            <td>${p.DischargeDate || ''}</td>
+            <td>${p.AdmitReason}</td>
+            <td>${p.RoomNumber}</td>
+            <td>${p.AttendingPhysician}</td>
+          </tr>`).join('');
+      }
+    });
+  </script>
+</body>
+
+</html>

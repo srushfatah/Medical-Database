@@ -1,0 +1,208 @@
+================================================================================
+  LoginDB.cpp
+================================================================================
+
+LoginDB.cpp Query 1 - Retrieve a user by their username:
+
+    "SELECT LoginID, PatientID, FirstName, LastName, Username, PasswordHash, Role "
+    "FROM users WHERE Username = ?"
+
+
+LoginDB.cpp Query 2 - Insert a new user account:
+
+    "INSERT INTO users (FirstName, LastName, Username, PasswordHash, Role) "
+    "VALUES (?, ?, ?, ?, ?)"
+
+
+================================================================================
+  AdmitDB.cpp
+================================================================================
+
+AdmitDB.cpp Query 1 - Admit a new patient (without a discharge date):
+
+    "INSERT INTO patient_Admit "
+    "(PatientName, Gender, Age, AdmitDate, AdmitReason, RoomNumber, AttendingPhysician) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?)"
+
+
+AdmitDB.cpp Query 2 - Admit a new patient (with a discharge date):
+
+    "INSERT INTO patient_Admit "
+    "(PatientName, Gender, Age, AdmitDate, DischargeDate, AdmitReason, RoomNumber, AttendingPhysician) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+
+
+AdmitDB.cpp Query 3 - Get the auto-generated PatientID of the last inserted patient:
+
+    "SELECT LAST_INSERT_ID() AS id"
+
+
+AdmitDB.cpp Query 4 - Update a patient's discharge date:
+
+    "UPDATE patient_Admit SET DischargeDate = ? WHERE PatientID = ?"
+
+
+AdmitDB.cpp Query 5 - Search for patients by name or room number (fuzzy match):
+
+    "SELECT PatientID, PatientName, Gender, Age, AdmitDate, DischargeDate, "
+    "AdmitReason, RoomNumber, AttendingPhysician "
+    "FROM patient_Admit "
+    "WHERE PatientName LIKE ? OR RoomNumber LIKE ? "
+    "ORDER BY PatientID DESC LIMIT 100"
+
+
+================================================================================
+  OrdersDB.cpp
+================================================================================
+
+OrdersDB.cpp Query 1 - Get all orders (most recent first, max 200):
+
+    "SELECT OrderID, PatientID, OrderType, OrderName, Dose, Frequency, "
+    "OrderingProvider, OrderStatus, OrderDateTime "
+    "FROM patient_Orders ORDER BY OrderID DESC LIMIT 200"
+
+
+OrdersDB.cpp Query 2 - Search orders by exact PatientID (when search term is a number):
+
+    "SELECT OrderID, PatientID, OrderType, OrderName, Dose, Frequency, "
+    "OrderingProvider, OrderStatus, OrderDateTime "
+    "FROM patient_Orders "
+    "WHERE PatientID = ? "
+    "ORDER BY OrderID DESC LIMIT 200"
+
+
+OrdersDB.cpp Query 3 - Search orders by order type or order name (fuzzy match):
+
+    "SELECT OrderID, PatientID, OrderType, OrderName, Dose, Frequency, "
+    "OrderingProvider, OrderStatus, OrderDateTime "
+    "FROM patient_Orders "
+    "WHERE OrderType LIKE ? OR OrderName LIKE ? "
+    "ORDER BY OrderID DESC LIMIT 200"
+
+
+OrdersDB.cpp Query 4 - Insert a new patient order:
+
+    "INSERT INTO patient_Orders "
+    "(PatientID, OrderDateTime, OrderType, OrderName, Dose, Frequency, OrderingProvider, OrderStatus) "
+    "VALUES (?, NOW(), ?, ?, ?, ?, ?, ?)"
+
+
+================================================================================
+  LabsDB.cpp
+================================================================================
+
+LabsDB.cpp Query 1 - Get all lab results joined with lab orders (most recent first, max 200):
+
+    "SELECT lr.LabResultID, l.PatientID, l.LabType, lr.ResultName, "
+    "lr.ResultValue, lr.Unit, lr.ReferenceRange, lr.Flag, l.LabDateTime "
+    "FROM Lab_Results lr "
+    "JOIN Labs l ON lr.LabID = l.LabID "
+    "ORDER BY lr.LabResultID DESC LIMIT 200"
+
+
+LabsDB.cpp Query 2 - Search lab results by exact PatientID (when search term is a number):
+
+    "SELECT lr.LabResultID, l.PatientID, l.LabType, lr.ResultName, "
+    "lr.ResultValue, lr.Unit, lr.ReferenceRange, lr.Flag, l.LabDateTime "
+    "FROM Lab_Results lr "
+    "JOIN Labs l ON lr.LabID = l.LabID "
+    "WHERE l.PatientID = ? "
+    "ORDER BY lr.LabResultID DESC LIMIT 200"
+
+
+LabsDB.cpp Query 3 - Search lab results by lab type (fuzzy match):
+
+    "SELECT lr.LabResultID, l.PatientID, l.LabType, lr.ResultName, "
+    "lr.ResultValue, lr.Unit, lr.ReferenceRange, lr.Flag, l.LabDateTime "
+    "FROM Lab_Results lr "
+    "JOIN Labs l ON lr.LabID = l.LabID "
+    "WHERE l.LabType LIKE ? "
+    "ORDER BY lr.LabResultID DESC LIMIT 200"
+
+
+LabsDB.cpp Query 4 - Insert a new lab order:
+
+    "INSERT INTO Labs (PatientID, LabDateTime, LabType, OrderingProvider, LabStatus) "
+    "VALUES (?, NOW(), ?, ?, ?)"
+
+
+================================================================================
+  TestsDB.cpp
+================================================================================
+
+TestsDB.cpp Query 1 - Get all test results joined with test orders (most recent first, max 200):
+
+    "SELECT tr.TestResultID, t.PatientID, t.TestType, "
+    "tr.Impression, tr.Findings, t.TestDateTime "
+    "FROM Test_Results tr "
+    "JOIN Tests t ON tr.TestID = t.TestID "
+    "ORDER BY tr.TestResultID DESC LIMIT 200"
+
+
+TestsDB.cpp Query 2 - Search test results by exact PatientID (when search term is a number):
+
+    "SELECT tr.TestResultID, t.PatientID, t.TestType, "
+    "tr.Impression, tr.Findings, t.TestDateTime "
+    "FROM Test_Results tr "
+    "JOIN Tests t ON tr.TestID = t.TestID "
+    "WHERE t.PatientID = ? "
+    "ORDER BY tr.TestResultID DESC LIMIT 200"
+
+
+TestsDB.cpp Query 3 - Search test results by test type (fuzzy match):
+
+    "SELECT tr.TestResultID, t.PatientID, t.TestType, "
+    "tr.Impression, tr.Findings, t.TestDateTime "
+    "FROM Test_Results tr "
+    "JOIN Tests t ON tr.TestID = t.TestID "
+    "WHERE t.TestType LIKE ? "
+    "ORDER BY tr.TestResultID DESC LIMIT 200"
+
+
+TestsDB.cpp Query 4 - Insert a new test order:
+
+    "INSERT INTO Tests (PatientID, TestDateTime, TestType, OrderingProvider, TestStatus) "
+    "VALUES (?, NOW(), ?, ?, ?)"
+
+
+================================================================================
+  BillingDB.cpp
+================================================================================
+
+BillingDB.cpp Query 1 - Get all billing records (most recent first, max 200):
+
+    "SELECT BillingID, PatientID, RoomCharge, VisitCharge, RxCharge, "
+    "LabCharge, ImagingCharge, TotalCharge, InsurancePaid, PatientPaid, BalanceDue "
+    "FROM patient_Billing ORDER BY BillingID DESC LIMIT 200"
+
+
+BillingDB.cpp Query 2 - Search billing by exact PatientID (when search term is a number):
+
+    "SELECT BillingID, PatientID, RoomCharge, VisitCharge, RxCharge, "
+    "LabCharge, ImagingCharge, TotalCharge, InsurancePaid, PatientPaid, BalanceDue "
+    "FROM patient_Billing "
+    "WHERE PatientID = ? "
+    "ORDER BY BillingID DESC LIMIT 200"
+
+
+BillingDB.cpp Query 3 - Search billing by PatientID (fuzzy match, for non-numeric search terms):
+
+    "SELECT BillingID, PatientID, RoomCharge, VisitCharge, RxCharge, "
+    "LabCharge, ImagingCharge, TotalCharge, InsurancePaid, PatientPaid, BalanceDue "
+    "FROM patient_Billing "
+    "WHERE CAST(PatientID AS CHAR) LIKE ? "
+    "ORDER BY BillingID DESC LIMIT 200"
+
+
+BillingDB.cpp Query 4 - Insert or update a billing record (upsert by PatientID):
+
+    "INSERT INTO patient_Billing "
+    "(PatientID, RoomCharge, VisitCharge, RxCharge, LabCharge, ImagingCharge, "
+    "TotalCharge, InsurancePaid, PatientPaid, BalanceDue) "
+    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+    "ON DUPLICATE KEY UPDATE "
+    "RoomCharge = VALUES(RoomCharge), VisitCharge = VALUES(VisitCharge), "
+    "RxCharge = VALUES(RxCharge), LabCharge = VALUES(LabCharge), "
+    "ImagingCharge = VALUES(ImagingCharge), TotalCharge = VALUES(TotalCharge), "
+    "InsurancePaid = VALUES(InsurancePaid), PatientPaid = VALUES(PatientPaid), "
+    "BalanceDue = VALUES(BalanceDue)"

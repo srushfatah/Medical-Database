@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hospital Management • Orders</title>
+  <link rel="stylesheet" href="styling.css" />
+</head>
+<body>
+  <div class="container">
+
+    <div class="topbar">
+      <div class="brand">Hospital Management <small>Orders</small></div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span class="badge" id="userDisplay"></span>
+        <button class="btn btn-danger" style="padding:6px 14px; font-size:0.82rem;" onclick="AUTH.logout()">Logout</button>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="admit.html"   id="navAdmit">Admitting</a>
+      <a href="orders.html"  class="active" id="navOrders">Orders</a>
+      <a href="labs.html"    id="navLabs">Labs</a>
+      <a href="tests.html"   id="navTests">Tests</a>
+      <a href="billing.html" id="navBilling">Billing</a>
+    </nav>
+
+    <!-- New Order form -->
+    <div class="card" style="margin-top:16px;" id="sectionOrderForm">
+      <div class="header">
+        <div style="font-weight:800;">New / Update Order</div>
+      </div>
+      <form id="orderForm">
+        <div class="grid grid-2">
+          <div>
+            <label for="orderPatientId">Patient ID</label>
+            <input id="orderPatientId" name="PatientID" type="number" required placeholder="101" />
+          </div>
+          <div>
+            <label for="orderType">Order Type</label>
+            <select id="orderType" name="OrderType" required>
+              <option value="">Select…</option>
+              <option value="Medication">Medication</option>
+              <option value="Lab">Lab</option>
+              <option value="Imaging">Imaging</option>
+              <option value="Procedure">Procedure</option>
+              <option value="Consult">Consult</option>
+            </select>
+          </div>
+          <div style="grid-column:1 / -1;">
+            <label for="orderName">Order Name</label>
+            <input id="orderName" name="OrderName" required placeholder="Amoxicillin 500mg" />
+          </div>
+          <div>
+            <label for="orderDose">Dose</label>
+            <input id="orderDose" name="Dose" placeholder="500mg" />
+          </div>
+          <div>
+            <label for="orderFrequency">Frequency</label>
+            <input id="orderFrequency" name="Frequency" placeholder="Twice daily" />
+          </div>
+          <div>
+            <label for="orderingProvider">Ordering Provider</label>
+            <input id="orderingProvider" name="OrderingProvider" placeholder="Dr. Hernandez" />
+          </div>
+          <div>
+            <label for="orderStatus">Status</label>
+            <select id="orderStatus" name="OrderStatus">
+              <option value="Ordered">Ordered</option>
+              <option value="Completed">Completed</option>
+              <option value="Canceled">Canceled</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="submit">Save Order</button>
+          <button class="btn" type="reset">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Search Orders</div>
+      </div>
+      <form id="ordersSearchForm">
+        <div class="row">
+          <div style="flex:1;">
+            <input id="ordersSearch" placeholder="Patient ID, type, or name" />
+          </div>
+          <button class="btn btn-primary">Search</button>
+          <button type="button" class="btn" onclick="loadOrders()">Clear</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Orders table -->
+    <div class="card" style="margin-top:16px;">
+      <div class="header">
+        <div style="font-weight:800;">Current Orders</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>OrderID</th><th>PatientID</th><th>OrderType</th><th>OrderName</th>
+              <th>Dose</th><th>Frequency</th><th>Provider</th><th>Status</th><th>DateTime</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr><td colspan="9" style="text-align:center; color:#718096;">
+              No orders loaded — connect backend to populate.
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script>
+    function renderOrders(data) {
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = '';
+
+      if (!data || !data.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="text-align:center; color:#718096;">
+              No orders found.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      data.forEach(o => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${o.OrderID ?? ''}</td>
+            <td>${o.PatientID ?? ''}</td>
+            <td>${o.OrderType ?? ''}</td>
+            <td>${o.OrderName ?? ''}</td>
+            <td>${o.Dose ?? ''}</td>
+            <td>${o.Frequency ?? ''}</td>
+            <td>${o.OrderingProvider ?? ''}</td>
+            <td>${o.OrderStatus ?? ''}</td>
+            <td>${o.OrderDateTime ?? ''}</td>
+          </tr>
+        `;
+      });
+    }
+
+    async function loadOrders(query = '') {
+      try {
+        const url = query
+          ? `http://localhost:8848/api/orders/search?q=${encodeURIComponent(query)}`
+          : `http://localhost:8848/api/orders`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || 'Failed to load orders.');
+          return;
+        }
+
+        renderOrders(data);
+      } catch {
+        alert('Could not reach the server.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!AUTH.canAccess('navOrders', 'edit')) {
+        AUTH.markReadOnly('sectionOrderForm');
+      }
+
+      loadOrders();
+
+      document.getElementById('ordersSearchForm').addEventListener('submit', e => {
+        e.preventDefault();
+        loadOrders(document.getElementById('ordersSearch').value.trim());
+      });
+
+      document.getElementById('orderForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const payload = {
+          PatientID: parseInt(document.getElementById('orderPatientId').value),
+          OrderType: document.getElementById('orderType').value,
+          OrderName: document.getElementById('orderName').value.trim(),
+          Dose: document.getElementById('orderDose').value.trim(),
+          Frequency: document.getElementById('orderFrequency').value.trim(),
+          OrderingProvider: document.getElementById('orderingProvider').value.trim(),
+          OrderStatus: document.getElementById('orderStatus').value
+        };
+
+        try {
+          const res = await fetch('http://localhost:8848/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            alert('Order saved.');
+            this.reset();
+            loadOrders();
+          } else {
+            alert(data.error || 'Failed to save order.');
+          }
+        } catch {
+          alert('Could not reach the server.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

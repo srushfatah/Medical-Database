@@ -1,0 +1,27 @@
+{
+    "listeners": [
+        {
+            "address": "0.0.0.0",
+            "port": 8848,
+            "https": false
+        }
+    ],
+    "db_clients": [
+        {
+            "rdbms":             "mysql",
+            "host":              "127.0.0.1",
+            "port":              3306,
+            "dbname":            "medicaltestdb",
+            "user":              "root",
+            "passwd":            "your-password-here",
+            "connection_number": 1,
+            "name":              "default"
+        }
+    ],
+    "app": {
+        "threads_num":   4,
+        "enable_session": true,
+        "session_timeout": 3600,
+        "document_root": "./frontend"
+    }
+}

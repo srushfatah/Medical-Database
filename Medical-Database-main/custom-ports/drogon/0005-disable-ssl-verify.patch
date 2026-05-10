@@ -1,0 +1,12 @@
+diff --git a/orm_lib/src/mysql_impl/MysqlConnection.cc b/orm_lib/src/mysql_impl/MysqlConnection.cc
+--- a/orm_lib/src/mysql_impl/MysqlConnection.cc
++++ b/orm_lib/src/mysql_impl/MysqlConnection.cc
+@@ -60,6 +60,8 @@
+     static thread_local MysqlThreadEnv threadEnv;
+     mysql_init(mysqlPtr_.get());
+     mysql_options(mysqlPtr_.get(), MYSQL_OPT_NONBLOCK, nullptr);
++    my_bool sslVerify = 0;
++    mysql_optionsv(mysqlPtr_.get(), MYSQL_OPT_SSL_VERIFY_SERVER_CERT, &sslVerify);
+ #ifdef HAS_MYSQL_OPTIONSV
+     mysql_optionsv(mysqlPtr_.get(), MYSQL_OPT_RECONNECT, &reconnect_);
+ #endif
