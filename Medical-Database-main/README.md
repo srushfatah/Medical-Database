@@ -57,8 +57,7 @@ Part 3 (getting the GitHub repo):
 In a terminal such as command prompt or vscode, go to the folder where you want to store the backend files by typing "cd" then paste the path to the folder (you can copy the path by right clicking a folder and clicking "copy as path").
 Next, type this:
 
-git clone https://github.com/Cel4h/4560-Medical-Database
-cd 4560-Medical-Database
+git clone https://github.com/srushfatah/Medical-Database
 
 
 ----------------------------------------------------------------------------------------------------------------------
@@ -177,7 +176,7 @@ Additional Notes:
 ----------------------------------------------------------------------------------------------------------------------
 Contributers:
 
-Srush Fatah & Luis Ruiz - Frontend
+Srush Fatah - Frontend
 
 Josh Heath - Backend
 
